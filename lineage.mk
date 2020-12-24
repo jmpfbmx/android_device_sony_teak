@@ -24,19 +24,19 @@ TARGET_SCREEN_WIDTH		:= 1080
 DEVICE_RESOLUTION		:= 1080x1920
 
 # Release name
-PRODUCT_RELEASE_NAME := Lenovo K8 Plus
+PRODUCT_RELEASE_NAME := SONY Xperia XA1 Plus
 
-PRODUCT_DEVICE			:= marino
-PRODUCT_NAME			:= lineage_marino
-PRODUCT_BRAND			:= Lenovo
-PRODUCT_MODEL			:= Lenovo K8 Plus
-PRODUCT_MANUFACTURER		:= LENOVO
+PRODUCT_DEVICE			:= teak
+PRODUCT_NAME			:= lineage_teak
+PRODUCT_BRAND			:= Sony
+PRODUCT_MODEL			:= SONY Xperia XA1 Plus
+PRODUCT_MANUFACTURER		:= SONY
 
 # Google client ID property.
-PRODUCT_GMS_CLIENTID_BASE := android-motorola
+PRODUCT_GMS_CLIENTID_BASE := android-sony
 
-BUILD_FINGERPRINT := Lenovo/marino_retail/marino:8.0.0/OMC27.70-56/87:user/release-keys
+BUILD_FINGERPRINT := alps/full_teak/teak:8.0.0/O00623/1564589454:user/test-keys
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRODUCT_NAME=marino_retail \
-    PRIVATE_BUILD_DESC="marino_retail-user 8.0.0 OMC27.70-56 87 release-keys"
+    PRODUCT_NAME=teak \
+    PRIVATE_BUILD_DESC="full_teak-user 8.0.0 O00623 1564589454 test-keys"

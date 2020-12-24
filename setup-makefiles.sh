@@ -18,8 +18,8 @@
 
 set -e
 
-DEVICE=marino
-VENDOR=lenovo
+DEVICE=teak
+VENDOR=sony
 
 INITIAL_COPYRIGHT_YEAR=2019
 

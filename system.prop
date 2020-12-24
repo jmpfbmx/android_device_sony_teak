@@ -1,5 +1,5 @@
 #
-# system.prop for Lenovo K8 Plus
+# system.prop for SONY XPERIA XA1 Plus
 #
 
 rild.libpath=mtk-ril.so
@@ -66,7 +66,7 @@ ro.mtk_perf_fast_start_win=1
 ro.mtk_perf_response_time=1
 
 persist.camera.expose.aux=1
-camera.aux.packagelist=com.motorola.cameraonemtk,com.motorola.motocit,com.mediatek.camera
+camera.aux.packagelist=com.mediatek.camera
 ro.mediatek.chip_ver=S01
 ro.mediatek.platform=MT6757
 ro.telephony.sim.count=2

@@ -14,6 +14,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-ifeq ($(TARGET_DEVICE),marino)
+ifeq ($(TARGET_DEVICE),teak)
 include $(call all-makefiles-under,$(LOCAL_PATH))
 endif

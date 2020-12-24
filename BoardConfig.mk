@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # mt6757 platform boardconfig
-LOCAL_PATH := device/lenovo/marino
+LOCAL_PATH := device/sony/teak
 
 # Platform
 TARGET_BOARD_PLATFORM := mt6757
@@ -64,10 +64,10 @@ TARGET_SCREEN_WIDTH := 1080
 
 # Kernel
 BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
-TARGET_KERNEL_SOURCE := kernel/lenovo/marino
-TARGET_KERNEL_CONFIG := marino_defconfig
+TARGET_KERNEL_SOURCE := kernel/sony/teak
+TARGET_KERNEL_CONFIG := teak_defconfig
 BOARD_KERNEL_BASE := 0x40078000
-BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_PAGESIZE := 4096
 BOARD_RAMDISK_OFFSET := 0x04f88000
 BOARD_TAGS_OFFSET := 0x03f88000
 BOARD_SECOND_OFFSET := 0x00e88000
@@ -209,6 +209,4 @@ DEVICE_MANIFEST_FILE := $(LOCAL_PATH)/manifest.xml
 DEVICE_MATRIX_FILE := $(LOCAL_PATH)/compatibility_matrix.xml
 
 # OTA assert
-TARGET_OTA_ASSERT_DEVICE := marino,marino_retail,xt1902-2,XT1902-2
-
-
+TARGET_OTA_ASSERT_DEVICE := teak,mt6757,xperia_xa1_plus

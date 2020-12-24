@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 #
-add_lunch_combo lineage_marino-userdebug
-add_lunch_combo lineage_marino-eng
-add_lunch_combo lineage_marino-user
+add_lunch_combo lineage_teak-userdebug
+add_lunch_combo lineage_teak-eng
+add_lunch_combo lineage_teak-user

@@ -9,6 +9,9 @@ import /vendor/etc/init/trustonic.rc
 import ${ro.mtkrc.path}meta_init.connectivity.rc
 import /vendor/etc/init/hw/meta_init.project.rc
 import /vendor/etc/init/microtrust.rc
+import init.sony-trimarea.rc
+import init.sony-bootstrap.rc
+
 #Make sure meta_init.modem.rc is the last rc file.
 import ${ro.mtkrc.path}meta_init.modem.rc
 
@@ -334,6 +337,16 @@ on post-fs-data
     chown root system /data/cct
     chmod 0771 /data/cct
 
+    #Create shading_otp mount point
+    mkdir /data/shading_otp
+    chown root system /data/shading_otp
+    chmod 0771 /data/shading_otp
+
+    #Create shading mount point
+    mkdir /data/shading
+    chown root system /data/shading
+    chmod 0771 /data/shading
+	
     # Set SELinux security contexts on upgrade or policy update.
     restorecon_recursive /nvdata
 
@@ -529,6 +542,12 @@ service console /system/bin/sh
     group shell log readproc
     seclabel u:r:shell:s0
 
+#CEI comment start
+#battery/charging bring up
+service fuelgauged /vendor/bin/fuelgauged
+	class main
+#CEI comment end
+
 on property:ro.debuggable=1
     # Give writes to anyone for the trace folder on debug builds.
     # The folder is used to store method traces.
@@ -551,10 +570,25 @@ service nvram_daemon /vendor/bin/nvram_daemon
     group system
     oneshot
 
-service fuelgauged /system/bin/fuelgauged
+#CEI comment start
+#battery/charging bring up
+#service fuelgauged /system/bin/fuelgauged
+    #class main
+#CEI comment end
+
+service pl_calibration /system/bin/pl_calibration
     class main
+    user root
+    oneshot
 
-
+#CEI comments start
+#Add NVRAM for SW version, project ID and MSN
+service nvram_write /system/bin/nvram_write
+    class main
+    user root
+    group system
+    oneshot
+#CEI comments end
 
 #adb,acm
 on property:ro.boot.usbconfig=0

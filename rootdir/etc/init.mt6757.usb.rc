@@ -32,16 +32,21 @@ on charger
 	setprop sys.usb.config mtp
 
 on boot
-	setprop sys.usb.vid 0E8D
-	write /sys/class/android_usb/android0/iManufacturer MediaTek
+	setprop sys.usb.vid 0FCE
+	write /sys/class/android_usb/android0/iManufacturer SONY
 	write /sys/class/android_usb/android0/iProduct ${ro.product.model}
 	write /sys/class/android_usb/android0/iSerial ${ro.serialno}
 	write /sys/class/android_usb/android0/f_rndis/wceis 1
-	write /sys/class/android_usb/android0/f_rndis/manufacturer MediaTek
+	write /sys/class/android_usb/android0/f_rndis/manufacturer SONY
 	write /sys/class/android_usb/android0/f_rndis/vendorID ${sys.usb.vid}
 	setprop sys.usb.acm_cnt 0
 	setprop sys.usb.acm_idx ""
 	setprop sys.usb.acm_enable 0
+
+#ro.cei.customer_projectid=0 --> SM11
+#ro.cei.customer_projectid=3 --> SM11L
+#ro.cei.customer_projectid=1 --> SM21
+
 
 # Used to disable USB when switching states
 on property:sys.usb.config=none
@@ -65,6 +70,8 @@ on property:sys.usb.config=adb && property:sys.usb.acm_enable=1
     start adbd
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=adb && property:sys.usb.acm_enable=0
+    setprop persist.sys.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
 	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
@@ -80,6 +87,12 @@ on property:sys.usb.config=mtp && property:sys.usb.acm_cnt=1
 	setprop sys.usb.pid 2012
 on property:sys.usb.config=mtp && property:sys.usb.acm_cnt=2
 	setprop sys.usb.pid 202A
+on property:sys.usb.config=mtp && property:ro.cei.customer_projectid=0
+	setprop sys.usb.pid 01EB
+on property:sys.usb.config=mtp && property:ro.cei.customer_projectid=3
+	setprop sys.usb.pid 01F5
+on property:sys.usb.config=mtp && property:ro.cei.customer_projectid=1
+	setprop sys.usb.pid 01EF
 on property:sys.usb.config=mtp && property:sys.usb.acm_enable=1
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
@@ -92,8 +105,8 @@ on property:sys.usb.config=mtp && property:sys.usb.acm_enable=1
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=mtp && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-	write /sys/class/android_usb/android0/idProduct 2e82
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
 	write /sys/class/android_usb/android0/functions mtp
     write /sys/class/android_usb/android0/enable 1
 	start adbd
@@ -104,10 +117,16 @@ on property:sys.usb.config=mtp,adb && property:sys.usb.acm_cnt=1
 	setprop sys.usb.pid 200A
 on property:sys.usb.config=mtp,adb && property:sys.usb.acm_cnt=2
 	setprop sys.usb.pid 2026
+on property:sys.usb.config=mtp,adb && property:ro.cei.customer_projectid=0
+	setprop sys.usb.pid 51EB
+on property:sys.usb.config=mtp,adb && property:ro.cei.customer_projectid=3
+	setprop sys.usb.pid 51F5
+on property:sys.usb.config=mtp,adb && property:ro.cei.customer_projectid=1
+	setprop sys.usb.pid 51EF
 on property:sys.usb.config=mtp,adb && property:sys.usb.acm_enable=1
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
+	write /sys/class/android_usb/android0/idProduct 51C6
 	write /sys/class/android_usb/android0/f_acm/port_index ${sys.usb.acm_idx}
 	write /sys/class/udc/musb-hdrc/device/saving 1
 	write /sys/class/android_usb/android0/functions mtp,adb,acm
@@ -116,8 +135,8 @@ on property:sys.usb.config=mtp,adb && property:sys.usb.acm_enable=1
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=mtp,adb && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-	write /sys/class/android_usb/android0/idProduct 2e76
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
     write /sys/class/android_usb/android0/functions mtp,adb
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -142,8 +161,8 @@ on property:sys.usb.config=ptp && property:sys.usb.acm_enable=1
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=ptp && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-	write /sys/class/android_usb/android0/idProduct 2e83
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
 	write /sys/class/android_usb/android0/functions ptp
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -166,8 +185,8 @@ on property:sys.usb.config=ptp,adb && property:sys.usb.acm_enable=1
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=ptp,adb && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-	write /sys/class/android_usb/android0/idProduct 2e84
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
 	write /sys/class/android_usb/android0/functions ptp,adb
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -180,6 +199,12 @@ on property:sys.usb.config=rndis && property:sys.usb.acm_cnt=1
 	setprop sys.usb.pid 2011
 on property:sys.usb.config=rndis && property:sys.usb.acm_cnt=2
 	setprop sys.usb.pid 202C
+on property:sys.usb.config=rndis && property:ro.cei.customer_projectid=0
+	setprop sys.usb.pid 71EB
+on property:sys.usb.config=rndis && property:ro.cei.customer_projectid=3
+	setprop sys.usb.pid 71F5
+on property:sys.usb.config=rndis && property:ro.cei.customer_projectid=1
+	setprop sys.usb.pid 71EF
 on property:sys.usb.config=rndis && property:sys.usb.acm_enable=1
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
@@ -192,8 +217,8 @@ on property:sys.usb.config=rndis && property:sys.usb.acm_enable=1
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=rndis && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-	write /sys/class/android_usb/android0/idProduct 2e24
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
 	write /sys/class/android_usb/android0/functions rndis
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -204,10 +229,16 @@ on property:sys.usb.config=rndis,adb && property:sys.usb.acm_cnt=1
 	setprop sys.usb.pid 2010
 on property:sys.usb.config=rndis,adb && property:sys.usb.acm_cnt=2
 	setprop sys.usb.pid 2028
+on property:sys.usb.config=rndis,adb && property:ro.cei.customer_projectid=0
+	setprop sys.usb.pid 81EB
+on property:sys.usb.config=rndis,adb && property:ro.cei.customer_projectid=3
+	setprop sys.usb.pid 81F5
+on property:sys.usb.config=rndis,adb && property:ro.cei.customer_projectid=1
+	setprop sys.usb.pid 81EF
 on property:sys.usb.config=rndis,adb && property:sys.usb.acm_enable=1
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
+	write /sys/class/android_usb/android0/idProduct 81C6
 	write /sys/class/android_usb/android0/f_acm/port_index ${sys.usb.acm_idx}
 	write /sys/class/udc/musb-hdrc/device/saving 1
 	write /sys/class/android_usb/android0/functions rndis,adb,acm
@@ -216,8 +247,8 @@ on property:sys.usb.config=rndis,adb && property:sys.usb.acm_enable=1
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=rndis,adb && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-	write /sys/class/android_usb/android0/idProduct 2e25
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
 	write /sys/class/android_usb/android0/functions rndis,adb
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -399,7 +430,7 @@ on property:sys.usb.config=mass_storage,adb && property:sys.usb.acm_cnt=2
 on property:sys.usb.config=mass_storage,adb && property:sys.usb.acm_enable=1
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
+	write /sys/class/android_usb/android0/idProduct 61C6
 	write /sys/class/android_usb/android0/f_acm/port_index ${sys.usb.acm_idx}
 	write /sys/class/udc/musb-hdrc/device/saving 1
 	write /sys/class/android_usb/android0/functions mass_storage,adb,acm
@@ -414,6 +445,40 @@ on property:sys.usb.config=mass_storage,adb && property:sys.usb.acm_enable=0
     write /sys/class/android_usb/android0/enable 1
     start adbd
     setprop sys.usb.state ${sys.usb.config}
+
+### main function : SOMC CDRom ###
+on property:sys.usb.config=mtp,cdrom && property:ro.cei.customer_projectid=0
+	setprop sys.usb.pid 41EB
+on property:sys.usb.config=mtp,cdrom && property:ro.cei.customer_projectid=3
+	setprop sys.usb.pid 41F5
+on property:sys.usb.config=mtp,cdrom && property:ro.cei.customer_projectid=1
+	setprop sys.usb.pid 41EF
+on property:sys.usb.config=mtp,cdrom && property:sys.usb.acm_enable=0
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+    write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
+    write /sys/class/android_usb/android0/functions mtp,mass_storage
+    write /sys/class/android_usb/android0/f_mass_storage/bicr 1
+    write /sys/class/android_usb/android0/f_mass_storage/lun/file "/dev/block/loop0"
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+### main function : SOMC CDRom with adb ###
+on property:sys.usb.config=mtp,cdrom,adb && property:ro.cei.customer_projectid=0
+	setprop sys.usb.pid 41EB
+on property:sys.usb.config=mtp,cdrom,adb && property:ro.cei.customer_projectid=3
+	setprop sys.usb.pid 41F5
+on property:sys.usb.config=mtp,cdrom,adb && property:ro.cei.customer_projectid=1
+	setprop sys.usb.pid 41EF
+on property:sys.usb.config=mtp,cdrom,adb && property:sys.usb.acm_enable=0
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
+    write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}
+    write /sys/class/android_usb/android0/functions mtp,mass_storage
+    write /sys/class/android_usb/android0/f_mass_storage/bicr 1
+    write /sys/class/android_usb/android0/f_mass_storage/lun/file "/dev/block/loop0"
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
 
 ### main function : bicr ###
 on property:sys.usb.config=bicr && property:sys.usb.acm_cnt=0

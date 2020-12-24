@@ -18,8 +18,8 @@
 
 set -e
 
-DEVICE=marino
-VENDOR=lenovo
+DEVICE=teak
+VENDOR=sony
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"

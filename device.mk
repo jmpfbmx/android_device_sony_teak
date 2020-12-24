@@ -62,9 +62,9 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/input/idc/AVRCP.idc:system/usr/idc/AVRCP.idc \
 	$(LOCAL_PATH)/input/keylayout/ACCDET.kl:system/usr/keylayout/ACCDET.kl \
 	$(LOCAL_PATH)/input/keylayout/AVRCP.kl:system/usr/keylayout/AVRCP.kl \
-	$(LOCAL_PATH)/input/keylayout/gf-keys.idc:system/usr/keylayout/gf-keys.idc \
-	$(LOCAL_PATH)/input/keylayout/gf-keys.kl:system/usr/keylayout/gf-keys.kl \
-	$(LOCAL_PATH)/input/keylayout/mtk-kpd.kl:system/usr/keylayout/mtk-kpd.kl
+	$(LOCAL_PATH)/input/keylayout/Generic.kl:system/usr/keylayout/Generic.kl \
+	$(LOCAL_PATH)/input/keylayout/mtk-kpd.kl:system/usr/keylayout/mtk-kpd.kl \
+	$(LOCAL_PATH)/input/keylayout/qwerty.kl:system/usr/keylayout/qwerty.kl
 
 # Media Configs
 PRODUCT_COPY_FILES += \
@@ -272,24 +272,43 @@ PRODUCT_PACKAGES += \
 	
 # Ramdisk
 PRODUCT_PACKAGES += \
-	factory_init.connectivity.rc \
-	factory_init.project.rc \
-	factory_init.rc \
-	fstab.enableswap \
-	fstab.mt6757 \
-	init.connectivity.rc \
-	init.modem.rc \
-	init.mt6757.rc \
-	init.mt6757.usb.rc \
-	init.project.rc \
-	init.recovery.mt6757.rc \
-	init.sensor_1_0.rc \
-	meta_init.connectivity.rc \
-	meta_init.modem.rc \
-	meta_init.project.rc \
-	meta_init.rc \
-	multi_init.rc \
-	ueventd.mt6757.rc
+    factory_init.connectivity.rc \
+    factory_init.project.rc \
+    factory_init.rc \
+    fstab.enableswap \
+    fstab.mt6757 \
+    init.connectivity.rc \
+    init.modem.rc \
+    init.mt6757.rc \
+    init.mt6757.usb.rc \
+    init.project.rc \
+    init.recovery.mt6757.rc \
+    init.sensor_1_0.rc \
+    init.sony-bootstrap-checkfirstboot.rc \
+    init.sony-bootstrap-mr.rc \
+    init.sony-bootstrap.rc \
+    init.sony-bootstrap-wipedata.rc \
+    init.sony-bugreport.rc \
+    init.sony-drm.rc \
+    init.sony-enterprise.rc \
+    init.sony-fota.rc \
+    init.sony-trimarea.rc \
+    meta_init.connectivity.rc \
+    meta_init.modem.rc \
+    meta_init.project.rc \
+    meta_init.rc \
+    multi_init.rc \
+    ueventd_mt6757.rc
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/sbin/checkfirstboot:root/sbin/checkfirstboot \
+    $(LOCAL_PATH)/rootdir/sbin/fota-ua:root/sbin/fota-ua \
+    $(LOCAL_PATH)/rootdir/sbin/fuelgauged_static:root/sbin/fuelgauged_static \
+    $(LOCAL_PATH)/rootdir/sbin/mr:root/sbin/mr \
+    $(LOCAL_PATH)/rootdir/sbin/tad_static:root/sbin/tad_static \
+    $(LOCAL_PATH)/rootdir/sbin/ua-data-mounter:root/sbin/ua-data-mounter \
+    $(LOCAL_PATH)/rootdir/sbin/wait4tad_static:root/sbin/wait4tad_static \
+    $(LOCAL_PATH)/rootdir/sbin/wipedata:root/sbin/wipedata \
 
 PRODUCT_PACKAGES += netutils-wrapper-1.0 
 
@@ -312,4 +331,4 @@ $(call inherit-product, frameworks/native/build/phone-xxxhdpi-3072-dalvik-heap.m
 $(call inherit-product-if-exists, frameworks/native/build/phone-xxxhdpi-3072-hwui-memory.mk)
 
 # Vendor
-$(call inherit-product, vendor/lenovo/marino/marino-vendor.mk)
+$(call inherit-product, vendor/sony/teak/teak-vendor.mk)

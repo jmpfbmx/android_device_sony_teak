@@ -8,34 +8,43 @@ import /vendor/etc/init/hw/init.aee.rc
 import ${ro.mtkrc.path}init.volte.rc
 import ${ro.mtkrc.path}init.mal.rc
 import ${ro.mtkrc.path}init.sensor_1_0.rc
+import init.sony-trimarea.rc
+import init.sony-bootstrap.rc
+import init.sony-fota.rc
+import init.sony-ramdump.rc
+import init.qns.rc
+import init.sony-enterprise.rc
+import init.sony-drm.rc
 
 # init.modem.rc must be the LAST rc file because vold.post_fs_data_done is set in it
 import ${ro.mtkrc.path}init.modem.rc
 # *** DO NOT import the new rc file after this line ***
 
 on early-init
-    write /proc/ppm/policy/sysboost_cluster_core_limit "7 1 1 4"
-    write /proc/ppm/policy/sysboost_cluster_freqidx_limit "7 1 7 0"
+    write /proc/ppm/policy/userlimit_min_cpu_freq "1 1794000"
+    write /proc/ppm/policy/userlimit_min_cpu_core "1 1"
     write /proc/bootprof "INIT:early-init"
     mount debugfs debugfs /sys/kernel/debug
     chmod 0755 /sys/kernel/debug
 
 on init
+
+    write /sys/block/zram0/comp_algorithm lz4
+
+    write /proc/sys/vm/swappiness 100
+
     # Support legacy paths
     symlink /sdcard /mnt/sdcard
 
     # if primary storage is physical, set ro.vold.primary_physical to 1
     # setprop ro.vold.primary_physical 1
 
+    # DIAG expose exp_main
+    setprop persist.aee.preserve.main enable
+
     # BATTERY proc
     chown shell system /proc/mtk_battery_cmd/current_cmd
     chown shell system /proc/mtk_battery_cmd/discharging_cmd
-
-    #Begin,lenovo-sw yelw1 ,Setup kernel dropbox permissions so that dropboxd can utilize it
-    chown root diag /sys/kernel/dropbox/event
-    chown root diag /sys/kernel/dropbox/data
-    #End,lenovo-sw yelw1 ,Setup kernel dropbox permissions so that dropboxd can utilize it
-
 
 # Temp Backward compatibility
     mkdir /protect_f 0771 system system
@@ -73,6 +82,25 @@ on charger
     mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/system /system ro wait
     exec /system/bin/e2fsck -f -p /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/cache
     mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/cache /cache rw wait
+    #mount Qnovo
+    wait /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo
+    mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo /qns nosuid nodev noatime noexec barrier=0 discard
+    chown qns qns /qns
+    chmod 0750 /qns
+    restorecon_recursive /qns
+    chown qns qns /sys/class/qns
+    chown qns qns /sys/class/qns/alarm
+    chown qns qns /sys/class/qns/battery_type
+    chown qns qns /sys/class/qns/charge_current
+    chown qns qns /sys/class/qns/charging_state
+    chown qns qns /sys/class/qns/current_now
+    chown qns qns /sys/class/qns/design
+    chown qns qns /sys/class/qns/fcc
+    chown qns qns /sys/class/qns/options
+    chown qns qns /sys/class/qns/soc
+    chown qns qns /sys/class/qns/temp
+    chown qns qns /sys/class/qns/voltage
+    start qns
     chmod 0660 /dev/spm
     chown system system /dev/spm
     start spm_script
@@ -82,6 +110,25 @@ on charger
     start fuelgauged
     start servicemanager
 
+# CEI comments start, FP22589, Prevent swelling
+on property:persist.service.battery.charge=0
+	write /sys/class/power_supply/battery/enable_llk 0
+
+on property:persist.service.battery.charge=1
+	write /sys/class/power_supply/battery/enable_llk 1
+# CEI comments end, FP22589, Prevent swelling
+
+# CEI comments start, BATTERY_CARE
+on property:persist.service.battery.smt_chg=activate
+    write /sys/class/power_supply/battery/smart_charging_activation 1
+
+on property:persist.service.battery.smt_chg=charging_suspend
+    write /sys/class/power_supply/battery/smart_charging_interruption 1
+
+on property:persist.service.battery.smt_chg=charging_resume
+    write /sys/class/power_supply/battery/smart_charging_interruption 0
+# CEI comments end, BATTERY_CARE
+
 on fs
     write /proc/bootprof "INIT:Mount_START"
     write /sys/kernel/debug/tracing/trace_marker "B|1|Mount"
@@ -89,14 +136,47 @@ on fs
     exec /system/bin/tune2fs -O has_journal -u 10010 -r 4096 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/userdata
     write /sys/kernel/debug/tracing/trace_marker "E"
     write /proc/bootprof "INIT:Mount_END"
+    write /proc/bootprof "INIT:Mount Qnovo image START"
+    #mount Qnovo
+    mkdir /qns 0750 qns qns
+    wait /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo
+    mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo /qns nosuid nodev noatime noexec barrier=0 discard
+    chown qns qns /qns
+    chmod 0750 /qns
+    restorecon_recursive /qns
+    write /proc/bootprof "INIT:Mount Qnovo image END"
+    insmod /system/lib/modules/texfat.ko
     write /proc/sys/vm/page-cluster 0
     swapon_all /fstab.enableswap
-    wait /dev/block/bootdevice/by-name/hw
-    start oem-hw-sh
+    # mount LTA-Label here as from Kitakami the mount path is changed.
+    mkdir /lta-label 0555 system system
+    wait /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/ltalabel
+    mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/ltalabel /lta-label nosuid nodev noatime noexec ro barrier=0 context=u:object_r:lta_label:s0
+    chown system system /lta-label
+    chmod 0555 /lta-label
+# CEI comments start
+# soft charge 3.0
+    chmod 0666 /sys/devices/platform/battery/SC30_En
+    chmod 0666 /sys/devices/platform/battery/SC30_Status
+    chmod 0666 /sys/devices/platform/battery/Chk_SC30_Data
+    chown system system /sys/devices/platform/battery/SC30_En
+    chown system system /sys/devices/platform/battery/SC30_Status
+    chown system system /sys/devices/platform/battery/Chk_SC30_Data
+# CEI comments end
+
+# CEI comments start
+# battery health(aging factor)
+    chown system system /sys/devices/platform/battery/charge_full_design
+    chown system system /sys/devices/platform/battery/age_counter
+    chown system system /sys/devices/platform/battery/age_mtkcalc
+    chown system system /sys/devices/platform/battery/age_avgmiscta
+    chown system system /sys/devices/platform/battery/age_testadd
+    chown system system /sys/devices/platform/battery/charge_full
+# CEI comments end
 
 on fs
 
-   mount iso9660 loop@/vendor/etc/iAmCdRom.iso /mnt/cd-rom ro
+   mount iso9660 loop@/vendor/etc/dop.iso /mnt/cd-rom ro
 
 on post-fs
     write /proc/bootprof "INIT:post-fs"
@@ -121,6 +201,7 @@ on post-fs
     chown radio system /proc/freqhopping/freqhopping_debug
     chown radio system /proc/freqhopping/status
     chown radio system /proc/freqhopping/userdef
+    mkdir /dev/socket/tfsw 0770 system system
 
 # change owner
     chown system system /proc/bootprof
@@ -157,11 +238,18 @@ on post-fs-data
     chown root system /data/cct
     chmod 0771 /data/cct
 
+    #Create shading_otp mount point
+    mkdir /data/shading_otp
+    chown root system /data/shading_otp
+    chmod 0771 /data/shading_otp
+
+    #Create shading mount point
+    mkdir /data/shading
+    chown root system /data/shading
+    chmod 0771 /data/shading
+	
     # Set SELinux security contexts on upgrade or policy update.
     restorecon_recursive /nvdata
-
-    # restorecon /persist to set SEPolicy label.
-    restorecon_recursive /persist
 
     chmod 0660 /data/misc/wifi/p2p_supplicant.conf
 
@@ -172,7 +260,7 @@ on post-fs-data
     mkdir /dev/radio 0770 radio radio
 
     mkdir /data/drm/wv 0770 drm system
-
+    symlink /oem/android-config/agps_profiles_conf2.xml /data/customization/agps_profiles_conf2.xml
     chmod 0660 /dev/spm
     chown system system /dev/spm
 
@@ -185,11 +273,15 @@ on post-fs-data
     chmod 0666 /dev/gps_emi
 
     # NFC
-    mkdir /data/nfc_socket 0771 nfc radio
+    #mkdir /data/nfc_socket 0771 nfc radio
 
-    #Begin,lenovo-sw yelw1,Setup folder for native to transfer data to NativeDropBoxAgent
-    mkdir /data/system/dropbox-add 0730 system diag
-    #End,lenovo-sw yelw1,Setup folder for native to transfer data to NativeDropBoxAgent
+    #B: [VY36] JackBB 2016/1/6 ETSI102695-1 5.5.4.3 Test case 2
+    mkdir /data/vendor/nfc 0760 nfc system
+    mkdir /data/vendor/nfc/param 0760 nfc system
+    #E: [VY36] JackBB 2016/1/6
+
+    # Create directory for font change support
+    exec u:r:font_selector_make_dir:s0 system -- /system/bin/font-selector-make-dir.sh
 
 # -----------------------
 # Add by MTK
@@ -203,8 +295,11 @@ on post-fs-data
 
 
     # dhcp server
-    mkdir /data/misc/dhcp 0770 dhcp wifi
-    chown dhcp wifi /data/misc/dhcp
+    #mkdir /data/misc/dhcp 0770 dhcp wifi
+    #chown dhcp wifi /data/misc/dhcp
+    # [BY57_O] SomcWifiService
+    mkdir /data/misc/dhcp 0770 dhcp system
+    chown dhcp system /data/misc/dhcp
 
     # dhcpv6 server
     mkdir /data/misc/wide-dhcpv6 0770 dhcp wifi
@@ -270,13 +365,15 @@ on post-fs-data
     chown audioserver audio /sys/bus/platform/devices/rt5509_param.0/prop_param
     chown audioserver audio /sys/bus/platform/devices/rt5509_param.1/prop_param
 
+    chown audioserver audio /sys/bus/platform/devices/rt5508_param.0/prop_param
+
     #Accdet
     chown root radio /sys/devices/platform/Accdet_Driver/driver/accdet_call_state
 
     #VideoCodec
     #insmod /vendor/lib/modules/vcodec_kernel_driver.ko
     mknod /dev/Vcodec c 160 0
-    chmod 0666 /dev/Vcodec
+    chmod 0660 /dev/Vcodec
     chown media system /dev/Vcodec
 
     #MJC
@@ -477,8 +574,6 @@ on post-fs-data
     chown system camera /dev/MAIN2AF
     chown system camera /dev/SUBAF
 
-    chmod 0660 /dev/GT24c64_CAM_CAL_DRV
-    chown system camera /dev/GT24c64_CAM_CAL_DRV
     #CCU
     chmod 0666 /dev/ccu
     chown system camera /dev/ccu
@@ -560,20 +655,14 @@ on post-fs-data
 	#Thermal
 	mkdir /data/.tp/ 0775 system system
 
-    # Utags check
-    mkdir /persist/utags
-    start utags_check
+    #Significant motion sensor type for Doze
+    chmod 0440 /sys/bus/platform/drivers/gsensor/pmrelax
+    chmod 0660 /sys/bus/platform/drivers/gsensor/tilt
+    chown system input /sys/bus/platform/drivers/gsensor/pmrelax
+    chown system input /sys/bus/platform/drivers/gsensor/tilt
 
 # End of adding by MTK drivers
 # -----------------------
-
-    #Begin yelw1 enable moto bug2go-bugreport
-    # Create bug2go folder
-    mkdir /data/vendor/bug2go 0770 log log
-
-    # Setup folder for aplogd
-    mkdir /data/vendor/aplogd 0750 log log
-    #End yelw1 enable moto bug2go-bugreport
 
 on boot
     write /proc/bootprof "INIT:boot"
@@ -582,15 +671,6 @@ on boot
     chmod 0660 /sys/power/autosleep
 
     chmod 0664 /sys/class/leds/lcd-backlight/brightness
-#lenovo.sw START huangsh4 config kungfu camera
-    chmod 0664 /sys/class/leds/flash/brightness
-    chmod 0664 /sys/class/leds/torch/brightness
-    chown system system /sys/class/leds/torch/brightness
-    chown system system /sys/class/leds/flash/brightness
-    restorecon /sys/class/leds/torch/brightness
-    restorecon /sys/class/leds/flash/brightness
-    restorecon /sys/devices/platform/kd_camera_flashlight.0/leds/torch/brightness
-#lenovo.sw END huangsh4 config kungfu camera
 
     chown system system /sys/devices/system/cpu/cpufreq/hotplug/cpu_num_base
     chmod 0660 /sys/devices/system/cpu/cpufreq/hotplug/cpu_num_base
@@ -619,7 +699,15 @@ on boot
     chown radio system /sys/power/tuxonice/do_hibernate
     chmod 0770 /sys/power/tuxonice
     chmod 0220 /sys/power/tuxonice/do_hibernate
+    chown system system /system/etc/tfswinfo/default.tfswinfo
+    chmod 0600          /system/etc/tfswinfo/default.tfswinfo
 
+
+
+# permissions for NFC
+		setprop ro.nfc.port "I2C"
+		chmod 0600 /dev/pn553
+		chown nfc nfc /dev/pn553
 
 # Smartbook Handler Framework
     chown system system /sys/power/sb_state
@@ -813,45 +901,6 @@ on property:ro.boot.boot_trace=1
 on property:persist.uartconsole.enable=1
     write /proc/mtprintk 1
 
-#Begin yelw1 support aplogd/bug2go
-
-on property:persist.log.aplogd.enable=1
-    start aplogd
-
-on property:persist.log.aplogd.enable=0
-    stop aplogd
-
-service aplogd /vendor/bin/aplogd
-    class late_start
-    #user log
-    #group log system sdcard_rw sdcard_r media_rw mount
-    # The user and group definitions above are intentionally disabled and left
-    # only as documentation. It actually starts as root and immediately drops
-    # to log plus those groups after preserving CAP_SYS_ADMIN, which is required
-    # for kernel logging.
-    disabled
-
-
-# Let init manage the bug2go-native wakelock, so that we guarantee its
-# lifecycle exactly matches that of bug2go-bugreport.  Since init sends
-# SIGKILL when stopping a service, we could not guarantee the wakelock would
-# get cleaned up if it were managed by bug2go-bugreport itself.
-on property:init.svc.bug2go-bugreport=running
-    write /sys/power/wake_lock bug2go-native
-
-on property:init.svc.bug2go-bugreport=stopping
-    write /sys/power/wake_unlock bug2go-native
-
-on property:init.svc.bug2go-bugreport=stopped
-    write /sys/power/wake_unlock bug2go-native
-
-service bug2go-bugreport /vendor/bin/bug2go-bugreport
-    class main
-    disabled
-    oneshot
-    keycodes 115 116 # VOLUME_UP + PWR
-
-#End yelw1 support aplogd/bug2go
 
 # bugreport is triggered by holding down volume down, volume up and power
 service bugreport /system/bin/dumpstate -d -p -B -z \
@@ -863,8 +912,35 @@ service bugreport /system/bin/dumpstate -d -p -B -z \
 
 on property:sys.boot_completed=1
     # restore perf. parameters
-    write /proc/ppm/policy/sysboost_cluster_freqidx_limit "7 1 -1 -1"
-    write /proc/ppm/policy/sysboost_cluster_core_limit "7 1 -1 -1"
+    write /proc/ppm/policy/userlimit_min_cpu_freq "1 -1"
+    write /proc/ppm/policy/userlimit_min_cpu_core "1 -1"
+
+service pl_calibration /system/bin/pl_calibration
+    class main
+    user root
+    oneshot
+
+#CEI comments start
+#Add NVRAM for SW version, project ID and MSN
+service nvram_write /system/bin/nvram_write
+    class main
+    user root
+    group system
+    oneshot
+#CEI comments end
+
+#S- [BY57] BUG#811 Grace_Chang G-sensor read miscTA for FRU
+service g_read_miscta /system/bin/g_read_miscta
+    class main
+    user root
+    group system
+    oneshot
+    disabled
+
+# Let g_read_miscta start later than nvram_daemon
+on property:sys.boot_completed=1
+    start g_read_miscta
+#E- [BY57] BUG#811 Grace_Chang G-sensor read miscTA for FRU
 
 # write proc for test sim
     on property:gsm.sim.ril.testsim=0
@@ -1022,6 +1098,27 @@ service mc64xxd /vendor/bin/mc64xxd
 #sensor service (end)
 #
 
+# Config file updater
+service ota-updater /system/bin/ota-config-updater.sh
+    class main
+    user system
+    group system
+    disabled
+    oneshot
+
+# set up symbolic links to proper configuration file
+service config-linker /system/bin/multi-cdf-symlinker.sh
+    class main
+    user system
+    group system
+    disabled
+    oneshot
+
+# Note! that there is a dependency towards taimport property
+# the property is set immediatly after execution of taimport.
+on property:init.taimport.ready=true
+    start config-linker
+
 #add for power-off alarm
 #service poad /vendor/bin/poad
 #    class main
@@ -1073,34 +1170,7 @@ on property:service.mbim.enable=0
 on property:service.mbim.enable=1
     start mbimd
 
-on property:ro.hw.dualsim=true
-   setprop persist.radio.multisim.config dsds
-
-on property:ro.hw.dualsim=false
-   setprop persist.radio.multisim.config ss
-
-# Write utag from property
-service mbm_spy /system/bin/mbm_spy
-    seclabel u:r:mbm_spy:s0
-    class late_start
+# SONY: Start Memory Pressure Observer daemon
+service mpobserver /system/bin/mpobserver
+    class main
     user root
-    oneshot
-
-#on property:sys.boot_completed=1
-#    start mbm_spy
-#    start oem-hw-sh
-
-service oem-hw-sh /vendor/bin/init.oem.hw.sh
-    seclabel u:r:init_hw:s0
-    class core
-    user root
-    oneshot
-    disabled
-
-service utags_check /system/bin/utags_check
-    class core
-    user root
-    oneshot
-    disabled
-
-
