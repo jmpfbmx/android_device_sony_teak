@@ -308,7 +308,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/sbin/tad_static:root/sbin/tad_static \
     $(LOCAL_PATH)/rootdir/sbin/ua-data-mounter:root/sbin/ua-data-mounter \
     $(LOCAL_PATH)/rootdir/sbin/wait4tad_static:root/sbin/wait4tad_static \
-    $(LOCAL_PATH)/rootdir/sbin/wipedata:root/sbin/wipedata \
+    $(LOCAL_PATH)/rootdir/sbin/wipedata:root/sbin/wipedata
 
 PRODUCT_PACKAGES += netutils-wrapper-1.0 
 
