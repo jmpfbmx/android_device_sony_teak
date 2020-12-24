@@ -20,3 +20,6 @@ Main Camera  | 23 MP, f/2.0, PDAF
 Front Camera | 8MP, f/2.0, AF
 
 ![Sony XPERIA XA1 Plus](https://images-na.ssl-images-amazon.com/images/I/81F7jzJIoVL._AC_SX466_.jpg)
+
+# THANKS TO:
+ - @Maanush2004 for his big work with Marino.
