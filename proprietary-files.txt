@@ -63,6 +63,7 @@ lib64/libja3m.so
 lib64/libjni_lomoeffect.so
 lib64/libjni_pacprocessor.so
 lib64/libjni_pq.so
+lib64/liblights-core.so
 lib64/libmediatek_exceptionlog.so
 lib64/libminiui.so
 lib64/libMiraVision_jni.so
@@ -104,6 +105,7 @@ lib/libgui_debug.so
 lib/libja3m.so
 lib/libjni_lomoeffect.so
 lib/libjni_pq.so
+lib/liblights-core.so
 lib/libmediatek_exceptionlog.so
 lib/libminiui.so
 lib/libmrdump.so
