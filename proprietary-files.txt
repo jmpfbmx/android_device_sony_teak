@@ -51,6 +51,7 @@ lib64/libem_sensor_jni.so
 lib64/libem_support_jni.so
 lib64/libem_usb_jni.so
 lib64/libem_wifi_jni.so
+lib64/libfpc_oem.so
 lib64/libfilterpack_facedetect.so
 lib64/libfpspolicy_fw.so
 lib64/libged_sys.so
@@ -95,6 +96,7 @@ lib/libem_sensor_jni.so
 lib/libem_support_jni.so
 lib/libem_usb_jni.so
 lib/libem_wifi_jni.so
+lib/libfpc_oem.so
 lib/libfpspolicy_fw.so
 lib/libged_sys.so
 lib/libgralloc_extra_sys.so
